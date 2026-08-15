@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 const connectDB = require("./config/db");
 const User = require("./models/User");
 const Category = require("./models/Category");
@@ -17,7 +18,7 @@ async function seed() {
       {
         name: "EventPulse Admin",
         email: "admin@eventpulse.com",
-        password: "admin123",
+        password: await bcrypt.hash("admin123", 10),
         role: "admin"
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
