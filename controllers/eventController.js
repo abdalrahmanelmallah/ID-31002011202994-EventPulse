@@ -237,6 +237,31 @@ exports.getEvents = async (req, res) => {
   }
 };
 
+exports.getEventById = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id)
+      .populate("category")
+      .populate("createdBy", "name email");
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      data: event
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 
 // POST /api/events
 exports.createEvent = async (req, res) => {
@@ -257,7 +282,7 @@ exports.createEvent = async (req, res) => {
       date,
       city,
       category,
-      createdBy: req.user.id
+      createdBy: req.user.userId
     });
 
     const populatedEvent = await Event.findById(event._id)
