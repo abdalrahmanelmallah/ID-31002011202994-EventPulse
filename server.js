@@ -1,13 +1,20 @@
 require("dotenv").config();
 
 const express = require("express");
+const mongoSanitize = require("express-mongo-sanitize");
+const morgan = require("morgan");
+
 const connectDB = require("./config/db");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Middleware
 app.use(express.json());
+app.use(morgan("dev"));
+app.use(mongoSanitize());
 
+// Routes
 app.get("/", (req, res) => {
   res.json({
     success: true,
@@ -32,6 +39,7 @@ app.use("/api/messages", require("./routes/messageRoutes"));
 async function startServer() {
   try {
     await connectDB();
+
     app.listen(PORT, () => {
       console.log(`EventPulse server running on http://localhost:${PORT}`);
     });
