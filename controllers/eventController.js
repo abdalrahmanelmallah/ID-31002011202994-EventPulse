@@ -282,7 +282,7 @@ exports.createEvent = async (req, res) => {
       date,
       city,
       category,
-      createdBy: req.user.userId
+      createdBy: req.user.id
     });
 
     const populatedEvent = await Event.findById(event._id)
