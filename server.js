@@ -63,6 +63,9 @@ app.use("/api/registrations", require("./routes/registrationRoutes"));
 app.use("/api/messages", require("./routes/messageRoutes"));
 app.use("/api/announcements", require("./routes/announcementRoutes"));
 
+const errorHandler = require("./middleware/errorHandler");
+app.use(errorHandler);
+
 async function startServer() {
   try {
     await connectDB();
