@@ -71,4 +71,13 @@ app.use(
   require("./routes/announcementRoutes")
 );
 
+// 404 handler
+app.use((req, res, next) => {
+  const AppError = require("./utils/AppError");
+  next(new AppError(`Route not found: ${req.method} ${req.originalUrl}`, 404));
+});
+
+// Central error handler must be registered last.
+app.use(require("./middleware/errorHandler"));
+
 module.exports = app;

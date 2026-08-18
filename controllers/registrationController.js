@@ -18,7 +18,8 @@ exports.registerForEvent = async (req, res) => {
 
     const existing = await Registration.findOne({
       user: userId,
-      event: eventId
+      event: eventId,
+      status: "registered"
     });
 
     if (existing) {
@@ -28,35 +29,56 @@ exports.registerForEvent = async (req, res) => {
       });
     }
 
-    const currentCount = await Registration.countDocuments({
-      event: eventId,
-      status: "registered"
-    });
+    // Atomically reserve one capacity slot. This prevents concurrent
+    // requests from pushing registrations above the event capacity.
+    const reservedEvent = await Event.findOneAndUpdate(
+      {
+        _id: eventId,
+        $expr: { $lt: ["$registrationCount", "$capacity"] }
+      },
+      { $inc: { registrationCount: 1 } },
+      { new: true }
+    );
 
-    if (currentCount >= event.capacity) {
+    if (!reservedEvent) {
       return res.status(400).json({
         success: false,
         message: "This event is full"
       });
     }
 
-    const registration = await Registration.create({
-      user: userId,
-      event: eventId,
-      status: "registered"
-    });
+    try {
+      const registration = await Registration.create({
+        user: userId,
+        event: eventId,
+        status: "registered"
+      });
 
-    const populatedRegistration = await Registration.findById(
-      registration._id
-    )
-      .populate("event")
-      .populate("user", "name email");
+      const populatedRegistration = await Registration.findById(
+        registration._id
+      )
+        .populate("event")
+        .populate("user", "name email");
 
-    res.status(201).json({
-      success: true,
-      message: "Registration created successfully",
-      data: populatedRegistration
-    });
+      res.status(201).json({
+        success: true,
+        message: "Registration created successfully",
+        data: populatedRegistration
+      });
+    } catch (error) {
+      // Release the reserved slot if the registration failed (including
+      // a concurrent duplicate registration caught by the unique index).
+      await Event.findByIdAndUpdate(eventId, { $inc: { registrationCount: -1 } });
+
+      if (error.code === 11000) {
+        return res.status(400).json({
+          success: false,
+          message: "You are already registered for this event"
+        });
+      }
+
+      throw error;
+    }
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -129,6 +151,10 @@ exports.cancelRegistration = async (req, res) => {
 
     registration.status = "cancelled";
     await registration.save();
+
+    await Event.findByIdAndUpdate(registration.event, {
+      $inc: { registrationCount: -1 }
+    });
 
     res.status(200).json({
       success: true,

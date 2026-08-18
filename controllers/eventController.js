@@ -5,12 +5,12 @@ const Event = require("../models/Event");
 // Supports:
 // ?category=ID
 // ?city=Cairo
-// ?from=2026-09-01
-// ?to=2026-12-31
+// ?startDate=2026-09-01
+// ?endDate=2026-12-31
 // ?page=1
 // ?limit=10
-// ?sort=date
-// ?sort=registrations
+// ?sortBy=date
+// ?sortBy=registrations
 // ?order=asc
 // ?order=desc
 // ?search=music
@@ -20,11 +20,11 @@ exports.getEvents = async (req, res) => {
     const {
       category,
       city,
-      from,
-      to,
+      startDate,
+      endDate,
       page = 1,
       limit = 10,
-      sort = "date",
+      sortBy = "date",
       order = "asc",
       search
     } = req.query;
@@ -58,29 +58,29 @@ exports.getEvents = async (req, res) => {
     }
 
     // Date range filter
-    if (from || to) {
+    if (startDate || endDate) {
       filter.date = {};
 
-      if (from) {
-        const fromDate = new Date(from);
+      if (startDate) {
+        const fromDate = new Date(startDate);
 
         if (isNaN(fromDate.getTime())) {
           return res.status(400).json({
             success: false,
-            message: "Invalid from date"
+            message: "Invalid startDate"
           });
         }
 
         filter.date.$gte = fromDate;
       }
 
-      if (to) {
-        const toDate = new Date(to);
+      if (endDate) {
+        const toDate = new Date(endDate);
 
         if (isNaN(toDate.getTime())) {
           return res.status(400).json({
             success: false,
-            message: "Invalid to date"
+            message: "Invalid endDate"
           });
         }
 
@@ -98,7 +98,7 @@ exports.getEvents = async (req, res) => {
     // Sorting
     let sortStage;
 
-    if (sort === "registrations") {
+    if (sortBy === "registrations") {
       sortStage = {
         registrationCount: order === "desc" ? -1 : 1,
         date: 1

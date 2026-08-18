@@ -1,4 +1,4 @@
-# EventPulse — Task 1
+# EventPulse — Event Management Backend API
 
 EventPulse is an Event Management Backend API built with Node.js, Express, and MongoDB/Mongoose.
 
@@ -75,3 +75,27 @@ npm run seed
 - Environment-variable database configuration
 - `.env` excluded from Git
 - Idempotent category/event/admin seed data
+
+
+## Event Query Features
+
+`GET /api/events` supports:
+
+- `category=ID`
+- `city=Cairo`
+- `startDate=2026-01-01`
+- `endDate=2026-12-31`
+- `page=1&limit=10`
+- `sortBy=date` or `sortBy=registrations`
+- `order=asc` or `order=desc`
+- `search=keyword` (case-insensitive title/description search)
+
+Filters can be combined. Pagination returns `total`, `page`, `limit`, and `totalPages`.
+
+## Validation, Errors and Tests
+
+- All POST and PATCH endpoints validate input with `express-validator`.
+- Validation failures return HTTP 422 with an `errors` array.
+- `AppError` and `asyncHandler` utilities are included.
+- A central error handler is mounted after all routes.
+- Run the test suite with `npm test`.

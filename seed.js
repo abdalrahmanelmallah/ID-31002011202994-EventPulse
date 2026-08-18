@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const connectDB = require("./config/db");
 const User = require("./models/User");
 const Category = require("./models/Category");
@@ -45,6 +45,7 @@ async function seed() {
         title: "Summer Music Festival",
         description: "A live music festival featuring local artists.",
         capacity: 500,
+        registrationCount: 0,
         date: new Date("2026-09-20T18:00:00Z"),
         city: "Cairo",
         category: categories.Music._id,
@@ -54,6 +55,7 @@ async function seed() {
         title: "Future Tech Conference",
         description: "Talks and workshops about modern software development.",
         capacity: 300,
+        registrationCount: 0,
         date: new Date("2026-10-10T10:00:00Z"),
         city: "Alexandria",
         category: categories.Tech._id,
@@ -63,6 +65,7 @@ async function seed() {
         title: "Community Football Day",
         description: "A friendly football event for the local community.",
         capacity: 100,
+        registrationCount: 0,
         date: new Date("2026-11-05T15:00:00Z"),
         city: "Mansoura",
         category: categories.Sports._id,

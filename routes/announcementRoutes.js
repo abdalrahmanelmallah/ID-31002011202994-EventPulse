@@ -5,6 +5,8 @@ const {
   getAnnouncements
 } = require("../controllers/announcementController");
 
+const { body } = require("express-validator");
+const validate = require("../middleware/validate");
 const requireAuth = require("../middleware/requireAuth");
 const requireRole = require("../middleware/requireRole");
 
@@ -16,6 +18,18 @@ router.post(
   "/",
   requireAuth,
   requireRole("admin"),
+  [
+    body("eventId")
+      .isMongoId()
+      .withMessage("eventId must be a valid MongoDB ID"),
+    body("text")
+      .trim()
+      .notEmpty()
+      .withMessage("Text is required")
+      .isLength({ max: 1000 })
+      .withMessage("Text cannot exceed 1000 characters")
+  ],
+  validate,
   createAnnouncement
 );
 

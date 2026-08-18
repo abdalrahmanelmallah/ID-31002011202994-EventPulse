@@ -13,6 +13,11 @@ const eventSchema = new mongoose.Schema(
       required: [true, "Event description is required"],
       trim: true
     },
+    registrationCount: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
     capacity: {
       type: Number,
       required: [true, "Capacity is required"],

@@ -83,6 +83,31 @@ describe("Events API", () => {
     expect(Array.isArray(response.body.data)).toBe(true);
   });
 
+  test("GET /api/events/:id returns 200", async () => {
+    const response = await request(app)
+      .get("/api/events/507f1f77bcf86cd799439011");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.success).toBe(true);
+  });
+
+  test("POST /api/events with valid data creates an event", async () => {
+    const response = await request(app)
+      .post("/api/events")
+      .set("Authorization", "Bearer TEST_ADMIN_TOKEN")
+      .send({
+        title: "Test Event",
+        description: "Test description",
+        capacity: 50,
+        date: "2026-12-15T18:00:00Z",
+        city: "Cairo",
+        category: "507f1f77bcf86cd799439011"
+      });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.body.success).toBe(true);
+  });
+
   test("POST /api/events without token returns 401", async () => {
     const response = await request(app)
       .post("/api/events")
